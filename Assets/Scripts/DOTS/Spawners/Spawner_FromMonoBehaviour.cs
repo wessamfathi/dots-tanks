@@ -19,5 +19,14 @@ public class Spawner_FromMonoBehaviour : MonoBehaviour
 		// Place the instantiated entity in a grid with some noise
 		var position = transform.TransformPoint(new float3(1.3F, noise.cnoise(new float2(1, 1) * 0.21F) * 2, 1.3F));
 		entityManager.SetComponentData(instance, new Translation { Value = position });
+		entityManager.AddComponent(instance, typeof(TankInputComponent));
+		entityManager.AddComponentData(instance, new TankSpeedComponent { Speed = 12, TurnSpeed = math.PI });
+
+		/*
+			EntityManager.SetComponentData(instance, new Translation { Value = position });
+            EntityManager.AddComponent(instance, typeof(BotTag));
+            EntityManager.AddComponentData(instance, new CollisionSize { Value = botSpawnFromEntity.CollisionSize });
+            EntityManager.AddComponentData(instance, new BotSpeed{ Value = new float2(rand.NextFloat(botSpawnFromEntity.MinSpeed, botSpawnFromEntity.MaxSpeed), rand.NextFloat(botSpawnFromEntity.MinSpeed, botSpawnFromEntity.MaxSpeed)) });
+		 */
 	}
 }
