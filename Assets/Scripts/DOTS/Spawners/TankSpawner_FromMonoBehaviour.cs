@@ -3,7 +3,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
-public class Spawner_FromMonoBehaviour : MonoBehaviour
+public class TankSpawner_FromMonoBehaviour : MonoBehaviour
 {
 	public GameObject Prefab;
 
@@ -21,5 +21,6 @@ public class Spawner_FromMonoBehaviour : MonoBehaviour
 		entityManager.SetComponentData(instance, new Translation { Value = position });
 		entityManager.AddComponent(instance, typeof(TankInputComponent));
 		entityManager.AddComponentData(instance, new TankSpeedComponent { Speed = 12, TurnSpeed = math.PI });
+		entityManager.AddComponentData(instance, new TankHealthComponent { Health = 5.0f });
 	}
 }

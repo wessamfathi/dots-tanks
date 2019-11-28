@@ -11,3 +11,8 @@ public struct TankInputComponent : IComponentData
 	public float MovementInputValue;
 	public float TurnInputValue;
 }
+
+public struct TankHealthComponent : IComponentData
+{
+	public float Health;
+}
