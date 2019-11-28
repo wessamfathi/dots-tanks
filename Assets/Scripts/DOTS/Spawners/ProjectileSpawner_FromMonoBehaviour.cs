@@ -9,6 +9,11 @@ public class ProjectileSpawner_FromMonoBehaviour : MonoBehaviour
 	public AudioSource SFX;
 	public ParticleSystem VFX;
 
+	public float MaxDamage;
+	public float Radius;
+	public int Health;
+	public float3 Force;
+
 	private void Start()
 	{
 		// Create entity prefab from the game object hierarchy once
@@ -23,7 +28,7 @@ public class ProjectileSpawner_FromMonoBehaviour : MonoBehaviour
 		entityManager.SetComponentData(instance, new Translation { Value = position });
 		entityManager.AddComponentData(instance, new ProjectileSpeedComponent { MetersPerSecond = 1.0f });
 		entityManager.AddComponentData(instance, new ProjectileLifetimeComponent { Seconds = 2.0f });
-		entityManager.AddComponentData(instance, new ProjectileDamageComponent { Force = new float3(1.0f), MaxDamage = 2.0f, Radius = 2.0f, Health = 100 });
+		entityManager.AddComponentData(instance, new ProjectileDamageComponent { Force = Force, MaxDamage = MaxDamage, Radius = Radius, Health = Health });
 
 		entityManager.AddSharedComponentData(instance, new ProjectileExplosionEffectsComponent { m_ExplosionAudio = SFX, m_ExplosionParticles = VFX });
 	}
