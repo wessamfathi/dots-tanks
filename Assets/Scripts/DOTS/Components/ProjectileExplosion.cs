@@ -8,6 +8,7 @@ public struct ProjectileDamageComponent : IComponentData
 	public float3 Force;
 	public float MaxDamage;
 	public float Radius;
+	public int Health;
 }
 
 public struct ProjectileExplosionAudioComponent : ISharedComponentData, IEquatable<ProjectileExplosionAudioComponent>
@@ -38,9 +39,4 @@ public struct ProjectileExplosionParticleComponent : ISharedComponentData, IEqua
 	{
 		return m_ExplosionParticles.GetHashCode();
 	}
-}
-
-public struct ExplodingProjectileComponent : IComponentData
-{
-
 }
