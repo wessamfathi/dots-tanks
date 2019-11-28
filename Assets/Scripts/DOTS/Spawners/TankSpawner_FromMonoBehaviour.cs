@@ -1,4 +1,5 @@
-﻿using Unity.Entities;
+﻿using System;
+using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
@@ -16,6 +17,12 @@ public class TankSpawner_FromMonoBehaviour : MonoBehaviour
 		var prefab = GameObjectConversionUtility.ConvertGameObjectHierarchy(Prefab, World.Active);
 		var entityManager = World.Active.EntityManager;
 
+		SpawnTank(prefab, entityManager, typeof(Tank1));
+		SpawnTank(prefab, entityManager, typeof(Tank2));
+	}
+
+	private void SpawnTank(Entity prefab, EntityManager entityManager, Type type)
+	{
 		// Efficiently instantiate a bunch of entities from the already converted entity prefab
 		var instance = entityManager.Instantiate(prefab);
 
@@ -25,5 +32,6 @@ public class TankSpawner_FromMonoBehaviour : MonoBehaviour
 		entityManager.AddComponent(instance, typeof(TankInputComponent));
 		entityManager.AddComponentData(instance, new TankSpeedComponent { Speed = Speed, TurnSpeed = TurnSpeed });
 		entityManager.AddComponentData(instance, new TankHealthComponent { Health = Health });
+		entityManager.AddComponent(instance, type);
 	}
 }

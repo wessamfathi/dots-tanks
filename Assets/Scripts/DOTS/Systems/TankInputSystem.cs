@@ -6,7 +6,23 @@ using Unity.Burst;
 public class TankInputSystem : JobComponentSystem
 {
 	[BurstCompile]
-	struct TankInputJob : IJobForEach<TankInputComponent>
+	[RequireComponentTag(typeof(Tank1))]
+	struct Tank1InputJob : IJobForEach<TankInputComponent>
+	{
+		public float DeltaTime;
+		public float MovementInputValue;
+		public float TurnInputValue;
+
+		public void Execute(ref TankInputComponent input)
+		{
+			input.MovementInputValue = MovementInputValue;
+			input.TurnInputValue = TurnInputValue;
+		}
+	}
+
+	[BurstCompile]
+	[RequireComponentTag(typeof(Tank2))]
+	struct Tank2InputJob : IJobForEach<TankInputComponent>
 	{
 		public float DeltaTime;
 		public float MovementInputValue;
@@ -21,14 +37,22 @@ public class TankInputSystem : JobComponentSystem
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
 	{
-		var job = new TankInputJob
+		var job1 = new Tank1InputJob
 		{
 			DeltaTime = Time.deltaTime,
 			MovementInputValue = Input.GetAxis("Vertical1"),
 			TurnInputValue = Input.GetAxis("Horizontal1")
 		};
 
-		inputDeps = job.Schedule(this, inputDeps);
+		var job2 = new Tank2InputJob
+		{
+			DeltaTime = Time.deltaTime,
+			MovementInputValue = Input.GetAxis("Vertical2"),
+			TurnInputValue = Input.GetAxis("Horizontal2")
+		};
+
+		inputDeps = job1.Schedule(this, inputDeps);
+		inputDeps = job2.Schedule(this, inputDeps);
 		return inputDeps;
 	}
 }
