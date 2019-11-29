@@ -30,6 +30,7 @@ public class ProjectileSpawner_FromMonoBehaviour : MonoBehaviour
 		entityManager.AddComponentData(instance, new ProjectileLifetimeComponent { Seconds = 2.0f });
 		entityManager.AddComponentData(instance, new ProjectileDamageComponent { Force = Force, MaxDamage = MaxDamage, Radius = Radius, Health = Health });
 
-		entityManager.AddSharedComponentData(instance, new ProjectileExplosionEffectsComponent { m_ExplosionAudio = SFX, m_ExplosionParticles = VFX });
+		entityManager.AddSharedComponentData(instance, new ProjectileExplosionAudioComponent { m_ExplosionAudio = SFX });
+		entityManager.AddSharedComponentData(instance, new ProjectileExplosionParticleComponent { m_ExplosionParticles = VFX });
 	}
 }
