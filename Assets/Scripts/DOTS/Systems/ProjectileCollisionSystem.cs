@@ -24,16 +24,18 @@ public class ProjectileCollisionSystem : JobComponentSystem
 	}
 
 	[BurstCompile]
-	struct CollisionEventImpulseJob : ICollisionEventsJob
+	struct CollisionEventImpulseJob : ITriggerEventsJob
 	{
 		public ComponentDataFromEntity<ProjectileDamageComponent> ProjectileDamageGroup;
 		public ComponentDataFromEntity<PhysicsVelocity> PhysicsVelocityGroup;
 		public ComponentDataFromEntity<TankHealthComponent> TankHealthGroup;
+        [ReadOnly] public ComponentDataFromEntity<Tank1> Tank1CollisionGroup;
+        [ReadOnly] public ComponentDataFromEntity<Tank2> Tank2CollisionGroup;
 
-		public void Execute(CollisionEvent collisionEvent)
+        public void Execute(TriggerEvent triggerEvent)
 		{
-			Entity entityA = collisionEvent.Entities.EntityA;
-			Entity entityB = collisionEvent.Entities.EntityB;
+			Entity entityA = triggerEvent.Entities.EntityA;
+			Entity entityB = triggerEvent.Entities.EntityB;
 
 			bool isBodyADynamic = PhysicsVelocityGroup.Exists(entityA);
 			bool isBodyBDynamic = PhysicsVelocityGroup.Exists(entityB);
@@ -41,45 +43,51 @@ public class ProjectileCollisionSystem : JobComponentSystem
 			bool isBodyAProjectile = ProjectileDamageGroup.Exists(entityA);
 			bool isBodyBProjectile = ProjectileDamageGroup.Exists(entityB);
 
-			if (isBodyAProjectile && isBodyBDynamic)
-			{
-				var projectileComponent = ProjectileDamageGroup[entityA];
-				var velocityComponent = PhysicsVelocityGroup[entityB];
-				var healthComponent = TankHealthGroup[entityB];
+            bool canCollide = (Tank1CollisionGroup.Exists(entityA) && Tank2CollisionGroup.Exists(entityB)) ||
+                (Tank2CollisionGroup.Exists(entityA) && Tank1CollisionGroup.Exists(entityB));
 
-				// Use the impulse force to affect our tank's linear velocity
-				velocityComponent.Linear = projectileComponent.Force;
-				PhysicsVelocityGroup[entityB] = velocityComponent;
+            if (canCollide)
+            {
+                if (isBodyAProjectile && isBodyBDynamic)
+                {
+                    var projectileComponent = ProjectileDamageGroup[entityA];
+                    var velocityComponent = PhysicsVelocityGroup[entityB];
+                    var healthComponent = TankHealthGroup[entityB];
 
-				// Apply damage to the tank
-				healthComponent.Health -= projectileComponent.MaxDamage;
-				TankHealthGroup[entityB] = healthComponent;
+                    // Use the impulse force to affect our tank's linear velocity
+                    velocityComponent.Linear = projectileComponent.Force;
+                    PhysicsVelocityGroup[entityB] = velocityComponent;
 
-				// Explode projectile
-				projectileComponent.Health = 0;
-				ProjectileDamageGroup[entityA] = projectileComponent;
-			}
+                    // Apply damage to the tank
+                    healthComponent.Health -= projectileComponent.MaxDamage;
+                    TankHealthGroup[entityB] = healthComponent;
 
-			if (isBodyBProjectile && isBodyADynamic)
-			{
-				var projectileComponent = ProjectileDamageGroup[entityB];
-				var velocityComponent = PhysicsVelocityGroup[entityA];
-				var healthComponent = TankHealthGroup[entityA];
+                    // Explode projectile
+                    projectileComponent.Health = 0;
+                    ProjectileDamageGroup[entityA] = projectileComponent;
+                }
 
-				// Use the impulse force to affect our tank's linear velocity
-				velocityComponent.Linear = projectileComponent.Force;
-				PhysicsVelocityGroup[entityA] = velocityComponent;
+                if (isBodyBProjectile && isBodyADynamic)
+                {
+                    var projectileComponent = ProjectileDamageGroup[entityB];
+                    var velocityComponent = PhysicsVelocityGroup[entityA];
+                    var healthComponent = TankHealthGroup[entityA];
 
-				// Apply damage to the tank
-				healthComponent.Health -= projectileComponent.MaxDamage;
-				TankHealthGroup[entityA] = healthComponent;
+                    // Use the impulse force to affect our tank's linear velocity
+                    velocityComponent.Linear = projectileComponent.Force;
+                    PhysicsVelocityGroup[entityA] = velocityComponent;
 
-				// Explode projectile
-				projectileComponent.Health = 0;
-				ProjectileDamageGroup[entityB] = projectileComponent;
-			}
+                    // Apply damage to the tank
+                    healthComponent.Health -= projectileComponent.MaxDamage;
+                    TankHealthGroup[entityA] = healthComponent;
+
+                    // Explode projectile
+                    projectileComponent.Health = 0;
+                    ProjectileDamageGroup[entityB] = projectileComponent;
+                }
+            }
 		}
-	}
+    }
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
 	{
@@ -88,6 +96,8 @@ public class ProjectileCollisionSystem : JobComponentSystem
 			ProjectileDamageGroup = GetComponentDataFromEntity<ProjectileDamageComponent>(),
 			PhysicsVelocityGroup = GetComponentDataFromEntity<PhysicsVelocity>(),
 			TankHealthGroup = GetComponentDataFromEntity<TankHealthComponent>(),
+            Tank1CollisionGroup = GetComponentDataFromEntity<Tank1>(),
+            Tank2CollisionGroup = GetComponentDataFromEntity<Tank2>(),
 		}.Schedule(m_StepPhysicsWorldSystem.Simulation,
 					ref m_BuildPhysicsWorldSystem.PhysicsWorld, inputDeps);
 
