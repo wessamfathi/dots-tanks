@@ -22,10 +22,10 @@ public class ProjectileExplosionSystem : ComponentSystem
         ExplosionVEffects.Clear();
         EntityManager.GetAllUniqueSharedComponentData(ExplosionVEffects);
 
-        Entities.WithAll<ProjectileDamageComponent, Translation>().ForEach(
-            (Entity entity, ref ProjectileDamageComponent projectile, ref Translation translation) =>
+        Entities.WithAll<ProjectileLifetimeComponent, ProjectileDamageComponent, Translation>().ForEach(
+            (Entity entity, ref ProjectileLifetimeComponent lifetime, ref ProjectileDamageComponent projectile, ref Translation translation) =>
             {
-                if (projectile.Health <= 0)
+                if (projectile.Health <= 0 || lifetime.Seconds <= 0)
                 {
                     // spawn SFX & VFX at projectile position
                     var explosionAudio = ExplosionSEffects[1].m_ExplosionAudio;

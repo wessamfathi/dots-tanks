@@ -28,11 +28,6 @@ public class ProjectileMovementSystem : JobComponentSystem
 		public void Execute(ref ProjectileLifetimeComponent lifetime)
 		{
 			lifetime.Seconds -= DeltaTime;
-
-			if (lifetime.Seconds <= 0)
-			{
-				//EntityManager.DestroyEntity();
-			}
 		}
 	}
 
