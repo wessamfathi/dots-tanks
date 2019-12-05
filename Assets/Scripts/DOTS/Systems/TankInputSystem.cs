@@ -30,7 +30,7 @@ public class TankInputSystem : ComponentSystem
 
                                  var instance = entityManager.Instantiate(spawnData.Prefab);
 
-                                 entityManager.SetComponentData(instance, new Translation { Value = translationValue });
+                                 entityManager.SetComponentData(instance, new Translation { Value = translationValue + spawnData.DeltaPosition });
                                  entityManager.SetComponentData(instance, new Rotation { Value = rotationValue });
                                  entityManager.AddComponentData(instance, new ProjectileSpeedComponent { MetersPerSecond = spawnData.Speed });
                                  entityManager.AddComponentData(instance, new ProjectileLifetimeComponent { Seconds = spawnData.Lifetime });

@@ -15,6 +15,7 @@ public class ProjectileSpawner_FromMonoBehaviour : MonoBehaviour
 	public float Radius;
 	public int Health;
 	public float3 Force;
+    public float3 DeltaPosition;
 
 	private void Start()
 	{
@@ -31,7 +32,8 @@ public class ProjectileSpawner_FromMonoBehaviour : MonoBehaviour
 			Radius = Radius, 
 			Force = Force, 
 			Health = Health,
-			Prefab = prefab
+            DeltaPosition = DeltaPosition,
+            Prefab = prefab
 		});
 
         entityManager.AddSharedComponentData(instance, new ProjectileExplosionAudioComponent { m_ExplosionAudio = SFX });
