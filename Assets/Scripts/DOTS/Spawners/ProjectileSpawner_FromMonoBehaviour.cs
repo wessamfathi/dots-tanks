@@ -22,9 +22,9 @@ public class ProjectileSpawner_FromMonoBehaviour : MonoBehaviour
 		var prefab = GameObjectConversionUtility.ConvertGameObjectHierarchy(Prefab, World.Active);
 		var entityManager = World.Active.EntityManager;
 
-		var instance = entityManager.Instantiate(prefab);
+		var instance = entityManager.CreateEntity();
 
-		entityManager.AddComponentData(instance, new ProjectileSpawnerComponent { 
+		entityManager.AddComponentData(instance, new ProjectileSpawnDataComponent { 
 			Speed = Speed,
 			Lifetime = Lifetime, 
 			MaxDamage = MaxDamage, 
@@ -33,5 +33,8 @@ public class ProjectileSpawner_FromMonoBehaviour : MonoBehaviour
 			Health = Health,
 			Prefab = prefab
 		});
-	}
+
+        entityManager.AddSharedComponentData(instance, new ProjectileExplosionAudioComponent { m_ExplosionAudio = SFX });
+        entityManager.AddSharedComponentData(instance, new ProjectileExplosionParticleComponent { m_ExplosionParticles = VFX });
+    }
 }

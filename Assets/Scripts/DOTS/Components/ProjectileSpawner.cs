@@ -1,7 +1,7 @@
 ﻿using Unity.Entities;
 using Unity.Mathematics;
 
-public struct ProjectileSpawnerComponent : IComponentData
+public struct ProjectileSpawnDataComponent : IComponentData
 {
 	public float Speed;
 	public float Lifetime;
