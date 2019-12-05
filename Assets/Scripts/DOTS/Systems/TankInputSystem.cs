@@ -1,58 +1,57 @@
 ﻿using UnityEngine;
 using Unity.Entities;
-using Unity.Jobs;
-using Unity.Burst;
+using Unity.Transforms;
 
-public class TankInputSystem : JobComponentSystem
+public class TankInputSystem : ComponentSystem
 {
-	[BurstCompile]
-	[RequireComponentTag(typeof(Tank1))]
-	struct Tank1InputJob : IJobForEach<TankInputComponent>
-	{
-		public float DeltaTime;
-		public float MovementInputValue;
-		public float TurnInputValue;
+    private float[] LastFireTime = { 0, 0 };
+    const float FireThreshold = 1.0f;
 
-		public void Execute(ref TankInputComponent input)
-		{
-			input.MovementInputValue = MovementInputValue;
-			input.TurnInputValue = TurnInputValue;
-		}
-	}
+    void UpdateInput<T>(float movement, float turn, float fire, int index)
+    {
+        Entities.WithAll<TankInputComponent, Translation, Rotation, T>().ForEach(
+             (Entity entity, ref TankInputComponent input, ref Translation translation, ref Rotation rotation) =>
+             {
+                 input.MovementInputValue = movement;
+                 input.TurnInputValue = turn;
 
-	[BurstCompile]
-	[RequireComponentTag(typeof(Tank2))]
-	struct Tank2InputJob : IJobForEach<TankInputComponent>
-	{
-		public float DeltaTime;
-		public float MovementInputValue;
-		public float TurnInputValue;
+                 if (fire > 0)
+                 {
+                     if (Time.time - LastFireTime[index] > FireThreshold)
+                     {
+                         LastFireTime[index] = Time.time;
+                         var translationValue = translation.Value;
+                         var rotationValue = rotation.Value;
 
-		public void Execute(ref TankInputComponent input)
-		{
-			input.MovementInputValue = MovementInputValue;
-			input.TurnInputValue = TurnInputValue;
-		}
-	}
+                         Entities.WithAll<ProjectileSpawnDataComponent>().ForEach(
+                             (Entity projectileEntity, ref ProjectileSpawnDataComponent spawnData) =>
+                             {
+                                 var entityManager = World.Active.EntityManager;
 
-	protected override JobHandle OnUpdate(JobHandle inputDeps)
-	{
-		var job1 = new Tank1InputJob
-		{
-			DeltaTime = Time.deltaTime,
-			MovementInputValue = Input.GetAxis("Vertical1"),
-			TurnInputValue = Input.GetAxis("Horizontal1")
-		};
+                                 var instance = entityManager.Instantiate(spawnData.Prefab);
 
-		var job2 = new Tank2InputJob
-		{
-			DeltaTime = Time.deltaTime,
-			MovementInputValue = Input.GetAxis("Vertical2"),
-			TurnInputValue = Input.GetAxis("Horizontal2")
-		};
+                                 entityManager.SetComponentData(instance, new Translation { Value = translationValue });
+                                 entityManager.SetComponentData(instance, new Rotation { Value = rotationValue });
+                                 entityManager.AddComponentData(instance, new ProjectileSpeedComponent { MetersPerSecond = spawnData.Speed });
+                                 entityManager.AddComponentData(instance, new ProjectileLifetimeComponent { Seconds = spawnData.Lifetime });
+                                 entityManager.AddComponentData(instance, new ProjectileDamageComponent
+                                 {
+                                     Force = spawnData.Force,
+                                     MaxDamage = spawnData.MaxDamage,
+                                     Radius = spawnData.Radius,
+                                     Health = spawnData.Health
+                                 });
 
-		inputDeps = job1.Schedule(this, inputDeps);
-		inputDeps = job2.Schedule(this, inputDeps);
-		return inputDeps;
-	}
+                                 entityManager.AddComponent<T>(instance);
+                             });
+                     }
+                 }
+             });
+    }
+
+    protected override void OnUpdate()
+    {
+        UpdateInput<Tank1>(Input.GetAxis("Vertical1"), Input.GetAxis("Horizontal1"), Input.GetAxis("Fire1"), 0);
+        UpdateInput<Tank2>(Input.GetAxis("Vertical2"), Input.GetAxis("Horizontal2"), Input.GetAxis("Fire2"), 1);
+    }
 }
