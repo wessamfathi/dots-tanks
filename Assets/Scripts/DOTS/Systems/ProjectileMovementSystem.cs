@@ -33,9 +33,9 @@ public class ProjectileMovementSystem : JobComponentSystem
 
 	protected override JobHandle OnUpdate(JobHandle inputDeps)
 	{
-		inputDeps = new ProjectileMovementJob { DeltaTime = Time.deltaTime }.Schedule(this, inputDeps);
-		inputDeps = new ProjectileLifetimeJob { DeltaTime = Time.deltaTime }.Schedule(this, inputDeps);
+		var movementInputDeps = new ProjectileMovementJob { DeltaTime = Time.deltaTime }.Schedule(this, inputDeps);
+		var lifetimeInputDeps = new ProjectileLifetimeJob { DeltaTime = Time.deltaTime }.Schedule(this, inputDeps);
 
-		return inputDeps;
+		return JobHandle.CombineDependencies(movementInputDeps, lifetimeInputDeps);
 	}
 }
